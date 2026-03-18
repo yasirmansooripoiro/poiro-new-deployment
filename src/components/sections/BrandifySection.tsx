@@ -13,12 +13,12 @@ gsap.registerPlugin(ScrollTrigger);
    ═══════════════════════════════════════════════════════ */
 
 const ASSET_ITEMS = [
-  { label: "Social Story", tag: "INSTAGRAM", color: "#FF5F1F" },
-  { label: "Product Hero", tag: "E-COMMERCE", color: "#FF5F1F" },
-  { label: "Video Thumbnail", tag: "YOUTUBE", color: "#FF5F1F" },
-  { label: "Banner Ad", tag: "DISPLAY", color: "#FF5F1F" },
-  { label: "Email Header", tag: "CRM", color: "#FF5F1F" },
-  { label: "Carousel Post", tag: "LINKEDIN", color: "#FF5F1F" },
+  { label: "Social Story", tag: "INSTAGRAM", color: "#ff8015" },
+  { label: "Product Hero", tag: "E-COMMERCE", color: "#ff8015" },
+  { label: "Video Thumbnail", tag: "YOUTUBE", color: "#ff8015" },
+  { label: "Banner Ad", tag: "DISPLAY", color: "#ff8015" },
+  { label: "Email Header", tag: "CRM", color: "#ff8015" },
+  { label: "Carousel Post", tag: "LINKEDIN", color: "#ff8015" },
 ];
 
 export default function BrandifySection() {

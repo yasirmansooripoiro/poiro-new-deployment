@@ -1,11 +1,18 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { Comfortaa } from "next/font/google";
+
+const comfortaa = Comfortaa({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  display: "swap",
+});
 
 const CRT_FONT_SIZES = {
   poiro: "clamp(20px, 3vw, 45px)",
-  engineering: "clamp(5px, 1.25vw, 17px)",
-  creativity: "clamp(7px, 1.1vw, 15px)",
+  engineering: "clamp(4px, 1vw, 14px)",
+  creativity: "clamp(6px, 1vw, 14px)",
 } as const;
 
 /* ═══════════════════════════════════════════════════════
@@ -174,15 +181,17 @@ export function CRTScreen({ className = "" }: { className?: string }) {
 
 const PoiroLogo = () => (
   <div
-    className="crt-text-wrap font-black tracking-tight text-[#FF5F1F] glow-text drop-shadow-[0_0_15px_rgba(255,95,31,0.5)]"
+    className={`crt-text-wrap font-black tracking-tight text-[#ff8015] glow-text drop-shadow-[0_0_15px_rgba(255,95,31,0.5)] ${comfortaa.className}`}
     style={{ fontSize: CRT_FONT_SIZES.poiro }}
   >
-    P<span className="text-white">ô</span>iro.
+    Pôirō
   </div>
 );
 
 const TextLogo = () => (
-  <div className="crt-text-wrap text-white glow-text drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
+  <div
+    className={`crt-text-wrap text-white glow-text drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] ${comfortaa.className}`}
+  >
     <span
       className="font-black uppercase tracking-widest block"
       style={{ fontSize: CRT_FONT_SIZES.engineering, lineHeight: 1.05 }}

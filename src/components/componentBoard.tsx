@@ -4,6 +4,13 @@ import { useRef, useEffect, useState, ReactNode } from "react";
 import gsap from "gsap";
 import Image from "next/image";
 import Link from "next/link";
+import { Comfortaa } from "next/font/google";
+
+const comfortaa = Comfortaa({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  display: "swap",
+});
 
 /* ═══════════════════════════════════════════════════════
    NAV
@@ -28,10 +35,16 @@ export function Nav({ onCtaClick }: NavProps) {
       const currentScrollY = window.scrollY;
       setIsScrolled(currentScrollY > 40);
 
-      if (currentScrollY > lastScrollYRef.current) {
-        scrollDirectionRef.current = "down";
-      } else if (currentScrollY < lastScrollYRef.current) {
-        scrollDirectionRef.current = "up";
+      const scrollDelta = currentScrollY - lastScrollYRef.current;
+
+      // Ignore small scroll jitters (like FAQ accordions expanding/collapsing)
+      if (Math.abs(scrollDelta) > 30) {
+        if (scrollDelta > 0) {
+          scrollDirectionRef.current = "down";
+        } else {
+          scrollDirectionRef.current = "up";
+        }
+        lastScrollYRef.current = currentScrollY;
       }
 
       if (currentScrollY > thresholdRef.current) {
@@ -39,8 +52,6 @@ export function Nav({ onCtaClick }: NavProps) {
       } else {
         setIsHidden(false);
       }
-
-      lastScrollYRef.current = currentScrollY;
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -79,7 +90,7 @@ export function Nav({ onCtaClick }: NavProps) {
         style={{ width: "120px", textDecoration: "none" }}
       >
         <div
-          className="flex items-center font-black text-brand-orange"
+          className={`flex items-center font-black text-brand-orange ${comfortaa.className}`}
           style={{ fontSize: "1.4rem", letterSpacing: "-0.025em" }}
         >
           <span
@@ -114,7 +125,7 @@ export function Nav({ onCtaClick }: NavProps) {
               transition: "all 700ms cubic-bezier(0.32, 0.72, 0, 1)",
             }}
           >
-            iro.
+            irō
           </span>
         </div>
       </Link>
@@ -190,7 +201,7 @@ export function Nav({ onCtaClick }: NavProps) {
             letterSpacing: "0.06em",
             textTransform: "uppercase",
             color: "#000",
-            background: "linear-gradient(135deg, #FF6B2B 0%, #FF5F1F 50%, #e8541a 100%)",
+            background: "linear-gradient(135deg, #FF6B2B 0%, #ff8015 50%, #e8541a 100%)",
             border: "1px solid rgba(255,95,31,0.6)",
             borderRadius: "10px",
             padding: "9px 20px",
@@ -207,7 +218,7 @@ export function Nav({ onCtaClick }: NavProps) {
             const el = e.currentTarget as HTMLElement;
             el.style.transform = "translateY(0)";
             el.style.boxShadow = "0 0 0 0 rgba(255,95,31,0)";
-            el.style.background = "linear-gradient(135deg, #FF6B2B 0%, #FF5F1F 50%, #e8541a 100%)";
+            el.style.background = "linear-gradient(135deg, #FF6B2B 0%, #ff8015 50%, #e8541a 100%)";
           }}
         >
           Book Demo

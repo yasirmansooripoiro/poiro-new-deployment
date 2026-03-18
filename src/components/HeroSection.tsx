@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useCallback, ReactNode } from "react";
+import { useRef, useEffect, useCallback, ReactNode, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useLenis } from "./SmoothScroll";
@@ -33,6 +33,7 @@ export default function HeroSection({ onFrameChange, framesLoaded, onIntroComple
   const sectionRef = useRef<HTMLDivElement>(null);
   const introCompleteRef = useRef(false);
   const introStartedRef = useRef(false);
+  const [preloaderDismissed, setPreloaderDismissed] = useState(false);
   const { stopScroll, startScroll } = useLenis();
 
   const setFrameIndex = useCallback(
@@ -43,9 +44,19 @@ export default function HeroSection({ onFrameChange, framesLoaded, onIntroComple
     [onFrameChange]
   );
 
-  /* ── Phase 1: Auto-intro after frames are loaded ── */
   useEffect(() => {
-    if (!framesLoaded || introStartedRef.current) return;
+    if (document.documentElement.dataset.preloaderDone === "true") {
+      setPreloaderDismissed(true);
+    }
+
+    const onPreloaderDismissed = () => setPreloaderDismissed(true);
+    window.addEventListener("propheus:preloader-dismissed", onPreloaderDismissed);
+    return () => window.removeEventListener("propheus:preloader-dismissed", onPreloaderDismissed);
+  }, []);
+
+  /* ── Phase 1: Auto-intro after frames are loaded and preloader is dismissed ── */
+  useEffect(() => {
+    if (!framesLoaded || !preloaderDismissed || introStartedRef.current) return;
     introStartedRef.current = true;
 
     onActiveChange?.(true);
@@ -88,7 +99,7 @@ export default function HeroSection({ onFrameChange, framesLoaded, onIntroComple
         onIntroComplete?.();
       },
     });
-  }, [framesLoaded, setFrameIndex, stopScroll, startScroll, onIntroComplete, onActiveChange]);
+  }, [framesLoaded, preloaderDismissed, setFrameIndex, stopScroll, startScroll, onIntroComplete, onActiveChange]);
 
   /* ── Cleanup ── */
   useEffect(() => {

@@ -6,6 +6,9 @@ import HeroCanvas from "@/components/HeroCanvas";
 import { Explosion } from "@/../components/Explosion";
 import OperatingSystemSection from "@/components/sections/OperatingSystemSection";
 import SecondVideoSection from "@/components/sections/SecondVideoSection";
+import MasonryGallerySection from "@/components/sections/MasonryGallerySection";
+import BriefCTASection from "@/components/sections/BriefCTASection";
+import FAQSection from "@/components/sections/FAQSection";
 import FooterCTASection from "@/components/sections/FooterCTASection";
 import PagePreloader from "@/../components/PagePreloader";
 import { Nav } from "@/components/componentBoard";
@@ -155,6 +158,12 @@ export default function Home() {
       >
         <HeroCanvas frameIndex={secondVideoRenderFrame} />
       </SecondVideoSection>
+
+      <MasonryGallerySection />
+
+      <BriefCTASection />
+
+      <FAQSection />
 
       {/* Footer section */}
       <FooterCTASection />

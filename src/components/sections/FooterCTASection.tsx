@@ -162,19 +162,6 @@ export default function FooterCTASection() {
           gap: "clamp(16px, 2vw, 22px)",
         }}
       >
-        <div
-          style={{
-            width: "min(100%, 1200px)",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "clamp(8px, 1.4vw, 14px)",
-          }}
-        >
-          <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
-            <ImagesBadgeDemo />
-          </div>
-        </div>
 
         <div
           style={{
