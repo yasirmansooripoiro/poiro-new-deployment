@@ -5,16 +5,18 @@ import { FRAME_SEGMENTS } from "@/../lib/frameSegments";
 
 /* ═══════════════════════════════════════════════════════
    FRAME-SEQUENCE CANVAS
-   Preloads hero frames first (fires load-progress events),
-   then lazily preloads second-video frames in the background.
+  Preloads all frames once (0→SECOND_VIDEO.end) and shares
+  the loaded cache across all HeroCanvas instances.
    Accepts any absolute frameIndex (0→SECOND_VIDEO.end)
    and draws the matching image on a <canvas>.
    ═══════════════════════════════════════════════════════ */
 
 const HERO = FRAME_SEGMENTS.HERO;
 const SV = FRAME_SEGMENTS.SECOND_VIDEO;
-const HERO_COUNT = HERO.end - HERO.start + 1;
 const TOTAL_FRAMES = SV.end - HERO.start + 1;
+
+let sharedFrames: HTMLImageElement[] | null = null;
+let sharedLoadPromise: Promise<HTMLImageElement[]> | null = null;
 
 function framePath(index: number): string {
   return `/frames/frame_${String(index).padStart(5, "0")}.webp`;
@@ -25,6 +27,54 @@ interface HeroCanvasProps {
   onFramesLoaded?: () => void;
 }
 
+function preloadAllFrames(): Promise<HTMLImageElement[]> {
+  if (sharedFrames) return Promise.resolve(sharedFrames);
+  if (sharedLoadPromise) return sharedLoadPromise;
+
+  const images: HTMLImageElement[] = new Array(TOTAL_FRAMES);
+  let loaded = 0;
+
+  const loadImage = (absoluteFrame: number): Promise<void> => {
+    const localIndex = absoluteFrame - HERO.start;
+    return new Promise<void>((resolve) => {
+      const img = new Image();
+      img.src = framePath(absoluteFrame);
+      img.onload = () => {
+        images[localIndex] = img;
+        loaded++;
+        const pct = Math.floor((loaded / TOTAL_FRAMES) * 100);
+        window.dispatchEvent(
+          new CustomEvent("propheus:load-progress", {
+            detail: { value: Math.min(pct, 99) },
+          })
+        );
+        resolve();
+      };
+      img.onerror = () => {
+        images[localIndex] = img;
+        loaded++;
+        const pct = Math.floor((loaded / TOTAL_FRAMES) * 100);
+        window.dispatchEvent(
+          new CustomEvent("propheus:load-progress", {
+            detail: { value: Math.min(pct, 99) },
+          })
+        );
+        resolve();
+      };
+    });
+  };
+
+  sharedLoadPromise = Promise.all(
+    Array.from({ length: TOTAL_FRAMES }, (_, i) => loadImage(HERO.start + i))
+  ).then(() => {
+    sharedFrames = images;
+    window.dispatchEvent(new CustomEvent("propheus:load-complete"));
+    return images;
+  });
+
+  return sharedLoadPromise;
+}
+
 export default function HeroCanvas({ frameIndex, onFramesLoaded }: HeroCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const framesRef = useRef<HTMLImageElement[]>([]);
@@ -32,57 +82,14 @@ export default function HeroCanvas({ frameIndex, onFramesLoaded }: HeroCanvasPro
   const loadedRef = useRef(false);
   const rafRef = useRef(0);
 
-  /* ── Preload hero frames first, then second-video frames lazily ── */
+  /* ── Preload all frames once; share across all HeroCanvas instances ── */
   useEffect(() => {
     if (loadedRef.current) return;
 
-    const images: HTMLImageElement[] = new Array(TOTAL_FRAMES);
-    let loaded = 0;
-
-    function loadImage(absoluteFrame: number): Promise<void> {
-      const localIndex = absoluteFrame - HERO.start;
-      return new Promise<void>((resolve) => {
-        const img = new Image();
-        img.src = framePath(absoluteFrame);
-        img.onload = () => {
-          images[localIndex] = img;
-          loaded++;
-          if (absoluteFrame <= HERO.end) {
-            const pct = Math.floor((loaded / HERO_COUNT) * 100);
-            window.dispatchEvent(
-              new CustomEvent("propheus:load-progress", {
-                detail: { value: Math.min(pct, 99) },
-              })
-            );
-          }
-          resolve();
-        };
-        img.onerror = () => {
-          images[localIndex] = img;
-          loaded++;
-          resolve();
-        };
-      });
-    }
-
-    /* Load hero frames (critical path) */
-    const heroPromises = Array.from({ length: HERO_COUNT }, (_, i) =>
-      loadImage(HERO.start + i)
-    );
-
-    Promise.all(heroPromises).then(() => {
+    preloadAllFrames().then((images) => {
       framesRef.current = images;
       loadedRef.current = true;
-      window.dispatchEvent(new CustomEvent("propheus:load-complete"));
       onFramesLoaded?.();
-
-      /* Lazily load second-video frames in the background */
-      const svCount = SV.end - SV.start + 1;
-      for (let i = 0; i < svCount; i++) {
-        loadImage(SV.start + i).then(() => {
-          framesRef.current = images;
-        });
-      }
     });
   }, [onFramesLoaded]);
 

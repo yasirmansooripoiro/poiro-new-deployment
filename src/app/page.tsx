@@ -1,10 +1,9 @@
 "use client";
 
-import { useRef, useCallback, useState, useEffect } from "react";
+import { useCallback, useState } from "react";
 import HeroSection from "@/components/HeroSection";
 import HeroCanvas from "@/components/HeroCanvas";
 import { Explosion } from "@/../components/Explosion";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import OperatingSystemSection from "@/components/sections/OperatingSystemSection";
 import SecondVideoSection from "@/components/sections/SecondVideoSection";
 import FooterCTASection from "@/components/sections/FooterCTASection";
@@ -13,52 +12,37 @@ import { Nav } from "@/components/componentBoard";
 import { FRAME_SEGMENTS } from "@/../lib/frameSegments";
 import { LightRays } from "@/../components/LightRays";
 import { AmbientParticles } from "@/../components/Particles";
+import LogoMarquee from "@/components/LogoMarquee";
 
 /* ═══════════════════════════════════════════════════════
    HOME PAGE
-   Hero (frame 0→420 + explosion) →
+  Hero (frame 0→599 + explosion) →
    Operating System →
-   Second Video (frame 421→661) →
+  Second Video (frame 600→779) →
    Footer CTA
 
-   A single fixed HeroCanvas renders both video segments.
-   The canvas stays at HERO.end while scrolling through
-   the normal sections in between.
+  Hero and second-video canvases render inside their
+  own pinned sections, so section flow is natural.
    ═══════════════════════════════════════════════════════ */
 
 const HERO = FRAME_SEGMENTS.HERO;
+const SECOND_VIDEO = FRAME_SEGMENTS.SECOND_VIDEO;
 
 function clamp(val: number, min: number, max: number) {
   return Math.max(min, Math.min(max, val));
 }
 
 export default function Home() {
-  const canvasFrameRef = useRef<number>(HERO.start);
-  const [displayFrame, setDisplayFrame] = useState<number>(HERO.start);
+  const [heroFrame, setHeroFrame] = useState<number>(HERO.start);
+  const [secondVideoFrame, setSecondVideoFrame] = useState<number>(SECOND_VIDEO.start);
   const [explosionProgress, setExplosionProgress] = useState(0);
   const [framesLoaded, setFramesLoaded] = useState(false);
   const [heroReady, setHeroReady] = useState(false);
-  const lastFrameRef = useRef(-1);
+  const [isSecondVideoActive, setIsSecondVideoActive] = useState(false);
 
-  /* ── rAF loop: read the ref and push to React state ── */
-  useEffect(() => {
-    let running = true;
-    const tick = () => {
-      if (!running) return;
-      const current = canvasFrameRef.current;
-      if (current !== lastFrameRef.current) {
-        lastFrameRef.current = current;
-        setDisplayFrame(current);
-      }
-      requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-    return () => { running = false; };
-  }, []);
-
-  /* ── Hero frames: update shared ref + explosion ── */
+  /* ── Hero frames: update hero segment state + explosion ── */
   const handleHeroFrameChange = useCallback((frameIndex: number) => {
-    canvasFrameRef.current = frameIndex;
+    setHeroFrame(frameIndex);
 
     const ep = clamp(
       (frameIndex - HERO.explosionStart) /
@@ -69,9 +53,9 @@ export default function Home() {
     setExplosionProgress(ep);
   }, []);
 
-  /* ── Second video frames: update shared ref ── */
+  /* ── Second video frames: update second segment state ── */
   const handleSecondVideoFrameChange = useCallback((frameIndex: number) => {
-    canvasFrameRef.current = frameIndex;
+    setSecondVideoFrame(frameIndex);
   }, []);
 
   /* ── Frames loaded from HeroCanvas ── */
@@ -88,11 +72,15 @@ export default function Home() {
   // scrolling forward: <280 = 1, 280→300 fade 1→0, >300 = 0
   // scrolling backward: >320 = 0, 300→280 fade 0→1, <280 = 1
   const overlayOpacity = (() => {
-    const frame = displayFrame;
+    const frame = heroFrame;
     if (frame < 280) return 1;
     if (frame <= 300) return 1 - (frame - 280) / 20;
     return 0;
   })();
+
+  const secondVideoRenderFrame = isSecondVideoActive
+    ? secondVideoFrame
+    : Math.max(secondVideoFrame, SECOND_VIDEO.start);
 
   return (
     <>
@@ -100,19 +88,13 @@ export default function Home() {
       <Nav />
       <Explosion explosionProgress={explosionProgress} />
 
-      {/* Fixed fullscreen canvas — renders both video segments */}
-      <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          zIndex: 0,
-          pointerEvents: "none",
-        }}
+      <HeroSection
+        onFrameChange={handleHeroFrameChange}
+        framesLoaded={framesLoaded}
+        onIntroComplete={handleHeroIntroComplete}
       >
         <HeroCanvas
-          frameIndex={displayFrame}
+          frameIndex={heroFrame}
           onFramesLoaded={handleFramesLoaded}
         />
 
@@ -158,13 +140,10 @@ export default function Home() {
             />
           </div>
         )}
-      </div>
+      </HeroSection>
 
-      <HeroSection
-        onFrameChange={handleHeroFrameChange}
-        framesLoaded={framesLoaded}
-        onIntroComplete={handleHeroIntroComplete}
-      />
+      {/* Logo marquee strip — directly below hero, above OS section */}
+      <LogoMarquee />
 
       {/* Normal sections — stacked naturally */}
       <OperatingSystemSection />
@@ -172,7 +151,10 @@ export default function Home() {
       <SecondVideoSection
         onFrameChange={handleSecondVideoFrameChange}
         heroReady={heroReady}
-      />
+        onActiveChange={setIsSecondVideoActive}
+      >
+        <HeroCanvas frameIndex={secondVideoRenderFrame} />
+      </SecondVideoSection>
 
       {/* Footer section */}
       <FooterCTASection />

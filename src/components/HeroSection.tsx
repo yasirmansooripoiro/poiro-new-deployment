@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, ReactNode } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useLenis } from "./SmoothScroll";
@@ -13,8 +13,8 @@ gsap.registerPlugin(ScrollTrigger);
    Phase 1: Auto-play frames start→introEnd (~3s, scroll locked)
    Phase 2: Scroll-driven frames introEnd→end via ScrollTrigger
 
-   The canvas is now rendered at the page level; this
-   component just reports frame changes via onFrameChange.
+  This section owns its viewport content and reports
+  frame changes via onFrameChange.
    ═══════════════════════════════════════════════════════ */
 
 const HERO = FRAME_SEGMENTS.HERO;
@@ -25,9 +25,11 @@ interface HeroSectionProps {
   onFrameChange?: (frameIndex: number) => void;
   framesLoaded?: boolean;
   onIntroComplete?: () => void;
+  onActiveChange?: (active: boolean) => void;
+  children?: ReactNode;
 }
 
-export default function HeroSection({ onFrameChange, framesLoaded, onIntroComplete }: HeroSectionProps) {
+export default function HeroSection({ onFrameChange, framesLoaded, onIntroComplete, onActiveChange, children }: HeroSectionProps) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const introCompleteRef = useRef(false);
   const introStartedRef = useRef(false);
@@ -46,6 +48,7 @@ export default function HeroSection({ onFrameChange, framesLoaded, onIntroComple
     if (!framesLoaded || introStartedRef.current) return;
     introStartedRef.current = true;
 
+    onActiveChange?.(true);
     stopScroll();
     document.documentElement.classList.add("scroll-locked");
 
@@ -77,13 +80,15 @@ export default function HeroSection({ onFrameChange, framesLoaded, onIntroComple
               Math.floor(self.progress * SCROLL_FRAMES);
             setFrameIndex(idx);
           },
+          onLeave: () => onActiveChange?.(false),
+          onEnterBack: () => onActiveChange?.(true),
         });
 
         ScrollTrigger.refresh();
         onIntroComplete?.();
       },
     });
-  }, [framesLoaded, setFrameIndex, stopScroll, startScroll, onIntroComplete]);
+  }, [framesLoaded, setFrameIndex, stopScroll, startScroll, onIntroComplete, onActiveChange]);
 
   /* ── Cleanup ── */
   useEffect(() => {
@@ -107,6 +112,17 @@ export default function HeroSection({ onFrameChange, framesLoaded, onIntroComple
         overflow: "hidden",
         background: "transparent",
       }}
-    />
+    >
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 1,
+          pointerEvents: "none",
+        }}
+      >
+        {children}
+      </div>
+    </section>
   );
 }

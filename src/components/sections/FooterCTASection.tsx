@@ -1,90 +1,59 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { PrimaryButton, SecondaryButton } from "@/components/componentBoard";
+import { CRTScreen } from "@/../components/CRTScreen";
+import ImagesBadgeDemo from "@/../components/images-badge-demo";
 
 gsap.registerPlugin(ScrollTrigger);
 
 /* ═══════════════════════════════════════════════════════
-   FOOTER CTA — Premium closing section
-   Smooth scroll-driven reveal with o_logo, glow effects,
-   and reversible animations.
+   FOOTER CTA — Grassland TV background + CRT overlay
    ═══════════════════════════════════════════════════════ */
+
+/* All values are percentages relative to scene container size. */
+const CRT_CENTER_X = "48.8%";
+const CRT_CENTER_Y = "31%";
+const CRT_WIDTH = "8.8%";
+const CRT_HEIGHT = "15%";
 
 export default function FooterCTASection() {
   const sectionRef = useRef<HTMLElement>(null);
-  const [hovered, setHovered] = useState(false);
 
   useEffect(() => {
     if (!sectionRef.current) return;
 
     const ctx = gsap.context(() => {
-      /* ── Logo reveal ── */
       gsap.fromTo(
-        ".footer-logo",
-        { opacity: 0, scale: 0.8 },
-        {
-          opacity: 0.06,
-          scale: 1,
-          duration: 1.4,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 65%",
-            once: true,
-          },
-        }
-      );
-
-      /* ── Horizontal line draw ── */
-      gsap.fromTo(
-        ".footer-line-draw",
-        { scaleX: 0 },
-        {
-          scaleX: 1,
-          duration: 1.2,
-          ease: "power3.inOut",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 60%",
-            once: true,
-          },
-        }
-      );
-
-      /* ── Staggered content reveal ── */
-      gsap.fromTo(
-        ".footer-reveal",
-        { opacity: 0, y: 50 },
+        ".footer-scene",
+        { opacity: 0, y: 60 },
         {
           opacity: 1,
           y: 0,
-          duration: 0.9,
-          stagger: 0.1,
+          duration: 1.2,
           ease: "power3.out",
           scrollTrigger: {
             trigger: sectionRef.current,
-            start: "top 55%",
+            start: "top 75%",
             once: true,
           },
         }
       );
 
-      /* ── Bottom links slide up ── */
       gsap.fromTo(
-        ".footer-bottom",
-        { opacity: 0, y: 20 },
+        ".footer-reveal",
+        { opacity: 0, y: 28 },
         {
           opacity: 1,
           y: 0,
           duration: 0.8,
+          stagger: 0.08,
           ease: "power3.out",
           scrollTrigger: {
-            trigger: ".footer-bottom",
-            start: "top 85%",
+            trigger: sectionRef.current,
+            start: "top 70%",
             once: true,
           },
         }
@@ -100,142 +69,92 @@ export default function FooterCTASection() {
       id="footer-cta"
       style={{
         position: "relative",
-        minHeight: "100vh",
+        minHeight: "100svh",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "center",
-        padding: "clamp(60px, 10vw, 140px) var(--space-3)",
+        justifyContent: "flex-end",
+        padding: "clamp(24px, 3vw, 40px) var(--space-3) clamp(24px, 4vw, 52px)",
         background: "#000",
         overflow: "hidden",
       }}
     >
-      {/* Background o_logo watermark */}
       <div
-        className="footer-logo"
+        className="footer-scene"
         style={{
           position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: "clamp(400px, 50vw, 800px)",
-          height: "clamp(400px, 50vw, 800px)",
-          pointerEvents: "none",
-          opacity: 0,
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          zIndex: 1,
         }}
       >
         <Image
-          src="/o_logo.png"
-          alt=""
+          src="/elements/footer.png"
+          alt="Poiro footer scene"
           fill
-          style={{ objectFit: "contain", filter: "brightness(0.5)" }}
-          aria-hidden="true"
+          priority={false}
+          sizes="(max-width: 768px) 100vw, (max-width: 1440px) 100vw, 1440px"
+          style={{ objectFit: "cover", objectPosition: "center bottom" }}
         />
-      </div>
 
-      {/* Background glow that reacts to CTA hover */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: "10%",
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: hovered ? "1200px" : "600px",
-          height: hovered ? "1200px" : "600px",
-          background:
-            "radial-gradient(circle, rgba(255,95,31,0.08) 0%, transparent 70%)",
-          transition: "all 1s cubic-bezier(0.22, 1, 0.36, 1)",
-          pointerEvents: "none",
-        }}
-      />
-
-      <div
-        style={{
-          maxWidth: 1200,
-          margin: "0 auto",
-          width: "100%",
-          position: "relative",
-        }}
-      >
-        {/* Divider line */}
         <div
-          className="footer-line-draw"
           style={{
-            height: "1px",
-            background: "var(--color-border-gray)",
-            marginBottom: "clamp(48px, 6vw, 96px)",
-            transformOrigin: "left center",
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+            background:
+              "linear-gradient(to bottom, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.38) 70%, rgba(0,0,0,0.78) 100%)",
+            zIndex: 1,
           }}
         />
 
-        {/* Eyebrow */}
-        <p
-          className="footer-reveal"
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: "0.75rem",
-            fontWeight: 700,
-            textTransform: "uppercase",
-            letterSpacing: "0.18em",
-            color: "var(--color-brand-orange)",
-            marginBottom: "var(--space-3)",
-          }}
-        >
-          Start Building
-        </p>
-
-        {/* Headline */}
-        <h2
-          className="footer-reveal"
-          style={{
-            fontSize: "clamp(42px, 7vw, 120px)",
-            fontWeight: 900,
-            lineHeight: 0.92,
-            letterSpacing: "-0.03em",
-            textTransform: "uppercase",
-            maxWidth: 1000,
-          }}
-        >
-          Engineering{" "}
-          <span style={{ color: "var(--color-brand-orange)" }}>Creativity</span>
-        </h2>
-
-        {/* Subtext */}
-        <p
-          className="footer-reveal"
-          style={{
-            marginTop: "var(--space-4)",
-            fontSize: "clamp(16px, 1.8vw, 22px)",
-            fontWeight: 500,
-            color: "var(--color-dark-gray)",
-            maxWidth: 600,
-            lineHeight: 1.55,
-          }}
-        >
-          Build your brand&apos;s creative engine with Poiro.
-        </p>
-
-        {/* CTA buttons */}
         <div
-          className="footer-reveal"
           style={{
-            marginTop: "clamp(32px, 4vw, 56px)",
-            display: "flex",
-            gap: "var(--space-2)",
-            flexWrap: "wrap",
-            alignItems: "center",
+            position: "absolute",
+            top: CRT_CENTER_Y,
+            left: CRT_CENTER_X,
+            width: CRT_WIDTH,
+            height: CRT_HEIGHT,
+            transform: "translate(-50%, -50%)",
+            zIndex: 3,
+            pointerEvents: "none",
           }}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
         >
-          <PrimaryButton size="lg">Save Your Spot</PrimaryButton>
-          <SecondaryButton size="lg">Book Demo</SecondaryButton>
+          <CRTScreen />
         </div>
 
-        {/* Footer bottom */}
+      </div>
+
+      <div
+        className="footer-reveal"
+        style={{
+          position: "relative",
+          zIndex: 3,
+          width: "100%",
+          marginTop: "auto",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "clamp(16px, 2vw, 22px)",
+        }}
+      >
         <div
-          className="footer-bottom"
           style={{
-            marginTop: "clamp(60px, 8vw, 120px)",
+            width: "min(100%, 1200px)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "clamp(8px, 1.4vw, 14px)",
+          }}
+        >
+          <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+            <ImagesBadgeDemo />
+          </div>
+        </div>
+
+        <div
+          style={{
+            width: "min(100%, 1200px)",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -251,7 +170,7 @@ export default function FooterCTASection() {
               alt="Poiro"
               width={20}
               height={20}
-              style={{ opacity: 0.6 }}
+              style={{ opacity: 0.7 }}
             />
             <span
               style={{
@@ -266,6 +185,7 @@ export default function FooterCTASection() {
               &copy; {new Date().getFullYear()} Poiro
             </span>
           </div>
+
           <div style={{ display: "flex", gap: "var(--space-3)" }}>
             {["Privacy", "Terms", "Contact"].map((link) => (
               <a
@@ -282,10 +202,10 @@ export default function FooterCTASection() {
                   transition: "color 0.3s ease",
                 }}
                 onMouseEnter={(e) => {
-                  (e.target as HTMLElement).style.color = "var(--color-brand-orange)";
+                  e.currentTarget.style.color = "var(--color-brand-orange)";
                 }}
                 onMouseLeave={(e) => {
-                  (e.target as HTMLElement).style.color = "var(--color-dark-gray)";
+                  e.currentTarget.style.color = "var(--color-dark-gray)";
                 }}
               >
                 {link}

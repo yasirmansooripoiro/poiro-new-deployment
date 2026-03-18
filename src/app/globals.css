@@ -58,10 +58,7 @@
   box-sizing: border-box;
 }
 
-/* Brutalist: no rounded corners anywhere */
-* {
-  border-radius: 0 !important;
-}
+/* Brutalist: sharp corners only where explicitly set */
 
 html {
   scroll-behavior: auto;
@@ -83,19 +80,19 @@ body {
 }
 
 /* ───────────────────────────────────────────────
-   CUSTOM SCROLLBAR
+   HIDDEN SCROLLBAR (Lenis-friendly)
    ─────────────────────────────────────────────── */
-::-webkit-scrollbar {
-  width: 8px;
+html,
+body {
+  scrollbar-width: none;      /* Firefox */
+  -ms-overflow-style: none;   /* IE/Edge legacy */
 }
-::-webkit-scrollbar-track {
-  background: var(--color-background);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--color-border-gray);
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-brand-orange);
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;              /* WebKit */
 }
 
 /* ───────────────────────────────────────────────

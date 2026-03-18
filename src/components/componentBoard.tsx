@@ -16,27 +16,24 @@ interface NavProps {
 export function Nav({ onCtaClick }: NavProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
+  const [hoveredLink, setHoveredLink] = useState<string | null>(null);
   const lastScrollYRef = useRef(0);
   const scrollDirectionRef = useRef<"up" | "down">("down");
   const thresholdRef = useRef(0);
 
   useEffect(() => {
-    // Calculate threshold for frame 180 (intro ends)
-    // PERCENT_PER_FRAME = 1.25% per frame, so frame 180 ≈ 180 * 1.25% of viewport height
     thresholdRef.current = window.innerHeight * (180 * 1.25 / 100);
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       setIsScrolled(currentScrollY > 40);
 
-      // Determine scroll direction
       if (currentScrollY > lastScrollYRef.current) {
         scrollDirectionRef.current = "down";
       } else if (currentScrollY < lastScrollYRef.current) {
         scrollDirectionRef.current = "up";
       }
 
-      // Hide navbar when scrolling down past threshold, show when scrolling up
       if (currentScrollY > thresholdRef.current) {
         setIsHidden(scrollDirectionRef.current === "down");
       } else {
@@ -53,19 +50,25 @@ export function Nav({ onCtaClick }: NavProps) {
   return (
     <nav
       id="main-nav"
-      className="fixed z-50 flex items-center justify-between backdrop-blur-xl"
+      className="fixed z-50 flex items-center justify-between"
       style={{
         top: "var(--space-3)",
         left: "50%",
-        transform: isHidden ? "translate(-50%, -120%)" : "translateX(-50%)",
+        transform: isHidden ? "translate(-50%, -130%)" : "translateX(-50%)",
         width: "95%",
         maxWidth: "1280px",
-        height: "64px",
-        padding: "0 var(--space-3)",
-        backgroundColor: "rgba(10, 10, 10, 0.9)",
-        border: "1px solid var(--border-gray)",
-        borderRadius: "12px",
-        boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.8)",
+        height: "60px",
+        padding: "0 8px 0 20px",
+        backgroundColor: isScrolled ? "rgba(8,8,8,0.88)" : "rgba(12,12,12,0.7)",
+        backdropFilter: "blur(24px) saturate(180%)",
+        WebkitBackdropFilter: "blur(24px) saturate(180%)",
+        border: isScrolled
+          ? "1px solid rgba(255,255,255,0.1)"
+          : "1px solid rgba(255,255,255,0.06)",
+        borderRadius: "18px",
+        boxShadow: isScrolled
+          ? "0 8px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)"
+          : "0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
         transition: "all 700ms cubic-bezier(0.32, 0.72, 0, 1)",
       }}
     >
@@ -95,11 +98,7 @@ export function Nav({ onCtaClick }: NavProps) {
           </span>
           <span
             className="inline-block"
-            style={{
-              position: "relative",
-              zIndex: 10,
-              transition: "transform 500ms ease",
-            }}
+            style={{ position: "relative", zIndex: 10, transition: "transform 500ms ease" }}
           >
             ô
           </span>
@@ -120,22 +119,34 @@ export function Nav({ onCtaClick }: NavProps) {
         </div>
       </Link>
 
-      {/* Links */}
+      {/* Links — grouped in frosted inner pill */}
       <div
         className="hidden md:flex items-center"
-        style={{ gap: "var(--space-4)" }}
+        style={{
+          gap: "4px",
+          background: "rgba(255,255,255,0.03)",
+          border: "1px solid rgba(255,255,255,0.06)",
+          borderRadius: "12px",
+          padding: "6px",
+        }}
       >
         {["Insights", "Brandify™", "Omni-Focus"].map((item) => (
           <a
             key={item}
             href={`#${item.toLowerCase().replace(/[^a-z]/g, "")}`}
-            className="hover:text-white transition-colors duration-300"
+            className="transition-all duration-200"
             style={{
-              fontSize: "14px",
+              fontSize: "13px",
               fontWeight: 500,
-              color: "var(--dark-gray)",
+              color: hoveredLink === item ? "#fff" : "rgba(180,180,180,0.8)",
               textDecoration: "none",
+              padding: "6px 14px",
+              borderRadius: "8px",
+              background: hoveredLink === item ? "rgba(255,255,255,0.08)" : "transparent",
+              letterSpacing: "0.01em",
             }}
+            onMouseEnter={() => setHoveredLink(item)}
+            onMouseLeave={() => setHoveredLink(null)}
           >
             {item}
           </a>
@@ -143,16 +154,80 @@ export function Nav({ onCtaClick }: NavProps) {
       </div>
 
       {/* CTA */}
-      <div className="flex items-center" style={{ gap: "var(--space-2)" }}>
+      <div className="flex items-center" style={{ gap: "6px" }}>
         <button
-          className="hidden md:block font-semibold text-white hover:text-brand-orange transition-colors bg-transparent border-none cursor-pointer"
-          style={{ fontSize: "14px" }}
+          className="hidden md:block transition-all duration-200 cursor-pointer"
+          style={{
+            fontSize: "13px",
+            fontWeight: 500,
+            color: "rgba(180,180,180,0.8)",
+            background: "transparent",
+            border: "none",
+            padding: "8px 14px",
+            borderRadius: "8px",
+            letterSpacing: "0.01em",
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.color = "#fff";
+            (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.color = "rgba(180,180,180,0.8)";
+            (e.currentTarget as HTMLElement).style.background = "transparent";
+          }}
         >
           Log In
         </button>
-        <PrimaryButton onClick={onCtaClick} size="sm">
+
+        <div style={{ width: "1px", height: "20px", background: "rgba(255,255,255,0.1)" }} />
+
+        <button
+          onClick={onCtaClick}
+          className="hidden md:flex items-center cursor-pointer transition-all duration-200"
+          style={{
+            fontSize: "12px",
+            fontWeight: 700,
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            color: "#000",
+            background: "linear-gradient(135deg, #FF6B2B 0%, #FF5F1F 50%, #e8541a 100%)",
+            border: "1px solid rgba(255,95,31,0.6)",
+            borderRadius: "10px",
+            padding: "9px 20px",
+            boxShadow: "0 0 0 0 rgba(255,95,31,0)",
+            gap: "6px",
+          }}
+          onMouseEnter={(e) => {
+            const el = e.currentTarget as HTMLElement;
+            el.style.transform = "translateY(-1px)";
+            el.style.boxShadow = "0 4px 20px rgba(255,95,31,0.4), 0 0 0 1px rgba(255,95,31,0.3)";
+            el.style.background = "linear-gradient(135deg, #FF7A3B 0%, #FF6B2B 50%, #f5601e 100%)";
+          }}
+          onMouseLeave={(e) => {
+            const el = e.currentTarget as HTMLElement;
+            el.style.transform = "translateY(0)";
+            el.style.boxShadow = "0 0 0 0 rgba(255,95,31,0)";
+            el.style.background = "linear-gradient(135deg, #FF6B2B 0%, #FF5F1F 50%, #e8541a 100%)";
+          }}
+        >
           Book Demo
-        </PrimaryButton>
+          <span style={{ fontSize: "10px", opacity: 0.7 }}>→</span>
+        </button>
+
+        <button
+          className="flex md:hidden items-center justify-center cursor-pointer"
+          style={{
+            width: "36px",
+            height: "36px",
+            background: "rgba(255,255,255,0.06)",
+            border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: "8px",
+            color: "#fff",
+            fontSize: "16px",
+          }}
+        >
+          ≡
+        </button>
       </div>
     </nav>
   );
@@ -191,6 +266,7 @@ export function PrimaryButton({
                  transition-all duration-200 ${className}`}
       style={{
         ...sizeStyles[size],
+        borderRadius: "10px",
         boxShadow: "var(--shadow-white-sm)",
       }}
       onMouseEnter={(e) => {
@@ -232,6 +308,7 @@ export function SecondaryButton({
                  transition-all duration-200 ${className}`}
       style={{
         ...sizeStyles[size],
+        borderRadius: "10px",
         boxShadow: "var(--shadow-sm)",
       }}
       onMouseEnter={(e) => {

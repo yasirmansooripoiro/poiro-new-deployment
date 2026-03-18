@@ -239,6 +239,11 @@ export default function OperatingSystemSection() {
                     background: isCurrent
                       ? "rgba(255,95,31,0.04)"
                       : "rgba(5,5,5,0.8)",
+                    borderRadius: idx === 0
+                      ? "12px 12px 0 0"
+                      : idx === PIPELINE.length - 1
+                      ? "0 0 12px 12px"
+                      : "0",
                     transition: "all 0.5s cubic-bezier(0.22, 1, 0.36, 1)",
                     marginTop: idx === 0 ? 0 : -1,
                   }}
@@ -307,6 +312,7 @@ export default function OperatingSystemSection() {
                           textTransform: "uppercase",
                           padding: "4px 10px",
                           border: "1px solid",
+                          borderRadius: "6px",
                           borderColor: isActive
                             ? "rgba(255,95,31,0.3)"
                             : "var(--color-border-gray)",
@@ -379,6 +385,7 @@ export default function OperatingSystemSection() {
             alignItems: "center",
             padding: "var(--space-2) var(--space-3)",
             border: "1px solid var(--color-border-gray)",
+            borderRadius: "10px",
             background: "rgba(5,5,5,0.9)",
           }}
         >
@@ -387,6 +394,7 @@ export default function OperatingSystemSection() {
               style={{
                 width: "8px",
                 height: "8px",
+                borderRadius: "50%",
                 background:
                   activeStage >= PIPELINE.length - 1
                     ? "#22c55e"
