@@ -12,7 +12,6 @@ const TABS: TabConfig[] = [
   { label: "Short Form", folder: "short-form" },
   { label: "Statics", folder: "statics" },
   { label: "UGC / Affiliate", folder: "ugc-affiliate" },
-  { label: "Microdrama", folder: "microdrama" },
   { label: "TVC / Animatics", folder: "tvc-animatics" },
 ];
 
@@ -252,15 +251,34 @@ export default function MasonryGallerySection() {
         background: "#000",
         paddingTop: "clamp(200px, 30vw, 280px)",
         paddingBottom: "clamp(100px, 12vw, 160px)",
-        paddingLeft: "var(--space-3)",
-        paddingRight: "var(--space-3)",
+        paddingLeft: "clamp(18px, 4vw, 48px)",
+        paddingRight: "clamp(18px, 4vw, 48px)",
       }}
     >
       <div style={{ maxWidth: 1400, margin: "0 auto", width: "100%" }}>
-        <p className="text-xs uppercase tracking-[0.35em] text-orange-500 text-center">Gallery Output</p>
-        <h2 className="text-5xl md:text-6xl font-black text-center tracking-tight text-white mt-3 mb-6 md:mb-8">
-          Creative Output Engine
-        </h2>
+        <div
+          style={{
+            paddingLeft: "clamp(6px, 1vw, 14px)",
+            paddingRight: "clamp(6px, 1vw, 14px)",
+          }}
+        >
+          <p
+            className="text-xs uppercase tracking-[0.35em] text-orange-500 text-center"
+            style={{ margin: 0, paddingTop: "clamp(6px, 0.9vw, 12px)" }}
+          >
+            Gallery Output
+          </p>
+          <h2
+            className="text-5xl md:text-6xl font-black text-center tracking-tight text-white"
+            style={{
+              marginTop: "clamp(30px, 4vw, 44px)",
+              marginBottom: "clamp(26px, 3vw, 38px)",
+              paddingBottom: "clamp(4px, 0.7vw, 10px)",
+            }}
+          >
+            Creative Output Engine
+          </h2>
+        </div>
 
         <div
           style={{

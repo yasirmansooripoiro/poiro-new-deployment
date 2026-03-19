@@ -45,7 +45,7 @@ function FooterScene() {
         }}
       >
         <Image
-          src="/elements/footer.png"
+          src="/elements/footer.webp"
           alt="Poiro footer scene"
           fill
           priority
@@ -148,6 +148,42 @@ export default function FooterCTASection() {
       }}
     >
       <FooterScene />
+
+      <div
+        className="footer-reveal"
+        style={{
+          position: "relative",
+          zIndex: 3,
+          width: "100%",
+          marginBottom: "auto",
+          paddingTop: "clamp(3px, 0.8vw, 10px)",
+          paddingLeft: "clamp(18px, 4vw, 52px)",
+          paddingRight: "clamp(18px, 4vw, 52px)",
+        }}
+      >
+        <div
+          style={{
+            width: "100%",
+            maxWidth: "980px",
+            margin: "0 auto",
+            paddingBottom: "clamp(54px, 9vw, 136px)",
+            textAlign: "center",
+          }}
+        >
+          <h3
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter leading-[0.95]"
+            style={{
+              margin: 0,
+              color: "#ffffff",
+              textWrap: "balance",
+            }}
+          >
+            Ship <span className="animate-gradient-text inline-block" style={{ paddingBottom: "12px" }}>more.</span> Spend <span className="animate-gradient-text inline-block" style={{ paddingBottom: "12px" }}>less.</span>
+            <br />
+            Create without <span className="animate-gradient-text inline-block" style={{ paddingBottom: "12px" }}>limits.</span>
+          </h3>
+        </div>
+      </div>
 
       <div
         className="footer-reveal"

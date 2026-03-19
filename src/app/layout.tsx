@@ -20,6 +20,11 @@ export const metadata: Metadata = {
   title: "Poiro — Engineering Creativity",
   description:
     "Social Insights → On-brand AI Assets. Poiro is the platform defining Engineering Creativity.",
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({

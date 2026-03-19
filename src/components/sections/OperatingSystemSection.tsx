@@ -18,33 +18,33 @@ const MODULES: ModuleConfig[] = [
     number: "01",
     title: "Understand",
     bigText: "Data Driven Insights",
-    contentTitle: "",
+    contentTitle: "Atlas",
     contentDesc:
       "Grounded in data, this is where audience signals, market context, and brand positioning come together to define what matters and how the brand should show up.",
     image:
-      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop",
+      "os/data.webp",
   },
   {
     id: "build",
     number: "02",
     title: "Build",
     bigText: "Workflow Systems",
-    contentTitle: "",
+    contentTitle: "Infinite Flow",
     contentDesc:
       "Structured through workflows, insights are shaped into clear narrative direction and repeatable content systems designed for consistency and scale.",
     image:
-      "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=2000&auto=format&fit=crop",
+      "/os/workflow.webp",
   },
   {
     id: "scale",
     number: "03",
     title: "Scale",
     bigText: "with AI Accelerators",
-    contentTitle: "",
+    contentTitle: "Poiro Studio",
     contentDesc:
       "Executed by AI producers, content is created, distributed, and continuously optimized to perform across channels and grow over time.",
     image:
-      "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=2000&auto=format&fit=crop",
+      "/os/creators.webp",
   },
 ];
 

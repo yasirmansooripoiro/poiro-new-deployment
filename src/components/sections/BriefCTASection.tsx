@@ -18,7 +18,14 @@ type TimelineStep = {
   textMargin: number;
 };
 
-type UploadState = "idle" | "uploading" | "success";
+type UploadState = "idle" | "uploading" | "success" | "error";
+
+type BriefFormData = {
+  name: string;
+  email: string;
+  company: string;
+  brief: string;
+};
 
 const TIMELINE: TimelineStep[] = [
   { step: 1, title: "Send the Brief", desc: "Share your goal, product, and guardrails.", tickHeight: 28, textMargin: 64 },
@@ -155,80 +162,143 @@ function BriefCTASection() {
   const [isHovered, setIsHovered] = useState(false);
   const [uploadState, setUploadState] = useState<UploadState>("idle");
   const [progress, setProgress] = useState(0);
-
-  const timeoutRefs = useRef<number[]>([]);
-  const tickerRef = useRef<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
+  const [uploadMessage, setUploadMessage] = useState<string>("");
+  const [briefFormData, setBriefFormData] = useState<BriefFormData>({
+    name: "",
+    email: "",
+    company: "",
+    brief: "",
+  });
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const mountTimer = window.setTimeout(() => setIsVisible(true), 200);
 
-    return () => {
-      window.clearTimeout(mountTimer);
-      timeoutRefs.current.forEach((id) => window.clearTimeout(id));
-      if (tickerRef.current !== null) {
-        window.clearInterval(tickerRef.current);
-      }
-    };
+    return () => window.clearTimeout(mountTimer);
   }, []);
 
+  useEffect(() => {
+    if (!isModalOpen) return;
+
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsModalOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", onEscape);
+    return () => window.removeEventListener("keydown", onEscape);
+  }, [isModalOpen]);
+
+  const appendFiles = (incoming: FileList | null) => {
+    if (!incoming) return;
+
+    const next = Array.from(incoming).filter((file) => file.size > 0);
+    if (!next.length) return;
+
+    setFiles((prev) => {
+      const key = (file: File) => `${file.name}-${file.size}-${file.lastModified}`;
+      const existing = new Set(prev.map(key));
+      const merged = [...prev];
+
+      next.forEach((file) => {
+        const id = key(file);
+        if (!existing.has(id)) {
+          existing.add(id);
+          merged.push(file);
+        }
+      });
+
+      return merged;
+    });
+  };
+
+  const removeFile = (indexToRemove: number) => {
+    setFiles((prev) => prev.filter((_, index) => index !== indexToRemove));
+  };
+
   const handleUploadClick = () => {
-    if (uploadState !== "idle") return;
+    if (uploadState === "uploading") return;
+    setUploadMessage("");
+    setIsModalOpen(true);
+  };
+
+  const handleSendBrief = async () => {
+    if (uploadState === "uploading") return;
+
+    const hasBriefText = briefFormData.brief.trim().length > 0;
+    const hasFiles = files.length > 0;
+
+    if (!briefFormData.email.trim()) {
+      setUploadMessage("Please enter your email so we can reply with your draft.");
+      return;
+    }
+
+    if (!hasBriefText && !hasFiles) {
+      setUploadMessage("Add a short brief or attach at least one file.");
+      return;
+    }
 
     setUploadState("uploading");
     setProgress(0);
     setIsHovered(false);
+    setIsModalOpen(false);
+    setUploadMessage("");
 
-    let currentProgress = 0;
-    let targetProgress = 0;
+    const formData = new FormData();
+    formData.append("name", briefFormData.name.trim());
+    formData.append("email", briefFormData.email.trim());
+    formData.append("company", briefFormData.company.trim());
+    formData.append("brief", briefFormData.brief.trim());
+    files.forEach((file) => formData.append("files", file));
 
-    const schedule = (fn: () => void, delay: number) => {
-      const id = window.setTimeout(fn, delay);
-      timeoutRefs.current.push(id);
-    };
+    await new Promise<void>((resolve) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "/api/brief-submit");
 
-    schedule(() => {
-      targetProgress = 20 + Math.random() * 15;
-    }, 100);
-    schedule(() => {
-      targetProgress = 45 + Math.random() * 15;
-    }, 600);
-    schedule(() => {
-      targetProgress = 60 + Math.random() * 5;
-    }, 1200);
-    schedule(() => {
-      targetProgress = 85 + Math.random() * 10;
-    }, 1700);
-    schedule(() => {
-      targetProgress = 99;
-    }, 2100);
-    schedule(() => {
-      targetProgress = 100;
-    }, 2800);
+      xhr.upload.onprogress = (event) => {
+        if (!event.lengthComputable) return;
+        const percent = Math.floor((event.loaded / event.total) * 97);
+        setProgress((current) => Math.max(current, percent));
+      };
 
-    tickerRef.current = window.setInterval(() => {
-      if (currentProgress < targetProgress) {
-        const diff = targetProgress - currentProgress;
-        currentProgress += Math.max(0.5, diff * 0.15);
-        if (currentProgress > 99.9 && targetProgress === 100) currentProgress = 100;
-
-        setProgress(Math.min(currentProgress, 100));
-      }
-
-      if (currentProgress >= 100) {
-        if (tickerRef.current !== null) {
-          window.clearInterval(tickerRef.current);
-          tickerRef.current = null;
+      xhr.onload = () => {
+        const success = xhr.status >= 200 && xhr.status < 300;
+        if (!success) {
+          setUploadState("error");
+          setUploadMessage("Upload failed. Please try again.");
+          setProgress(0);
+          resolve();
+          return;
         }
 
-        schedule(() => {
-          setUploadState("success");
-          schedule(() => {
-            setUploadState("idle");
-            setProgress(0);
-          }, 3000);
-        }, 200);
-      }
-    }, 30);
+        setProgress(100);
+        setUploadState("success");
+        setUploadMessage("Brief sent successfully.");
+
+        window.setTimeout(() => {
+          setUploadState("idle");
+          setProgress(0);
+          setBriefFormData({ name: "", email: "", company: "", brief: "" });
+          setFiles([]);
+          setUploadMessage("");
+        }, 2400);
+
+        resolve();
+      };
+
+      xhr.onerror = () => {
+        setUploadState("error");
+        setUploadMessage("Network error while uploading. Please try again.");
+        setProgress(0);
+        resolve();
+      };
+
+      xhr.send(formData);
+    });
   };
 
   const lineDrawTime = 2.5;
@@ -318,6 +388,90 @@ function BriefCTASection() {
             background-clip: text;
             color: transparent;
           }
+
+          /* Upload modal (local-only styles) */
+          .brief-modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 120;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(12px, 2vw, 24px);
+            background: rgba(0, 0, 0, 0.62);
+            backdrop-filter: blur(8px);
+          }
+
+          .brief-modal-panel {
+            width: min(100%, 760px);
+            max-height: min(88vh, 760px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: linear-gradient(145deg, rgba(14,14,14,0.9), rgba(7,7,7,0.86));
+            box-shadow: 0 30px 120px rgba(0, 0, 0, 0.65);
+            overflow: hidden;
+          }
+
+          .brief-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 18px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          }
+
+          .brief-modal-body {
+            padding: 16px 20px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            max-height: calc(min(88vh, 760px) - 74px);
+            overflow-y: auto;
+          }
+
+          .brief-modal-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+          }
+
+          @media (min-width: 768px) {
+            .brief-modal-grid {
+              grid-template-columns: 1fr 1fr;
+            }
+          }
+
+          .brief-modal-dropzone {
+            border-radius: 16px;
+            border: 2px dashed rgba(255, 255, 255, 0.18);
+            background: rgba(255, 255, 255, 0.04);
+            padding: 16px;
+            transition: 240ms ease;
+          }
+
+          .brief-modal-dropzone.is-active {
+            border-color: rgba(255, 128, 21, 0.9);
+            background: rgba(255, 128, 21, 0.1);
+          }
+
+          .brief-modal-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+          }
+
+          .brief-modal-btn {
+            height: 40px;
+            padding: 0 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            line-height: 1;
+            white-space: nowrap;
+          }
         `}
       </style>
 
@@ -330,8 +484,20 @@ function BriefCTASection() {
           style={{ maxWidth: 1120, margin: "0 auto", marginBottom: "clamp(28px, 4vw, 56px)" }}
         >
           <h2 className={`text-4xl md:text-6xl lg:text-7xl font-black text-white tracking-tighter ${montserrat.className}`}>
-            Upload your <span className="brief-animate-text-flow">Brief</span>
+            Don't <span className="brief-animate-text-flow">believe</span> us?
           </h2>
+          <h4
+            style={{
+              marginTop: "clamp(18px, 2.4vw, 30px)",
+              fontSize: "clamp(18px, 2vw, 26px)",
+              lineHeight: 1.45,
+              fontWeight: 600,
+              color: "#c6c6c6",
+              letterSpacing: "0.01em",
+            }}
+          >
+            Share your Brief & we’ll come back with a <br />structured approach and a clear content direction
+          </h4>
         </div>
 
         <div
@@ -398,13 +564,15 @@ function BriefCTASection() {
 
             <button
               type="button"
-              disabled={uploadState !== "idle"}
+              disabled={uploadState === "uploading"}
               className={`relative min-w-[300px] md:min-w-[340px] min-h-[52px] md:min-h-[58px] px-12 md:px-14 py-4 md:py-5 backdrop-blur-md rounded-full font-bold uppercase tracking-[0.16em] text-[15px] overflow-hidden flex items-center justify-center transition-all duration-500 ${
                 uploadState === "idle"
                   ? "bg-[#0a0a0a]/80 border border-white/20 text-white group-hover:bg-white group-hover:text-black group-hover:border-white group-hover:shadow-[0_0_40px_rgba(255,255,255,0.3)] active:scale-[0.96] active:bg-[#e0e0e0] active:shadow-inner"
                   : uploadState === "uploading"
                   ? "bg-[#0a0a0a]/80 border border-[#333] text-white cursor-wait shadow-inner"
-                  : "bg-green-500/10 border border-green-500 text-green-400 cursor-default brief-anim-success-pop"
+                  : uploadState === "success"
+                  ? "bg-green-500/10 border border-green-500 text-green-400 cursor-default brief-anim-success-pop"
+                  : "bg-red-500/10 border border-red-500 text-red-400 cursor-pointer"
               }`}
             >
               {uploadState === "uploading" && (
@@ -487,6 +655,8 @@ function BriefCTASection() {
                     Uploaded
                   </>
                 )}
+
+                {uploadState === "error" && "Retry Upload"}
               </span>
             </button>
           </div>
@@ -497,10 +667,14 @@ function BriefCTASection() {
             }`}
           >
             <span className="text-[#888] text-xs md:text-sm uppercase tracking-[0.2em] font-mono font-bold group-hover:text-[#ff8015]/80 transition-colors duration-500">
-              Drag & drop files or click to browse
+              Click & Share your brief with us
             </span>
           </div>
         </div>
+
+        {uploadMessage && uploadState === "error" && (
+          <p className="mt-4 text-sm text-red-400 font-mono tracking-wide">{uploadMessage}</p>
+        )}
 
         <div
           className="relative w-full max-w-[1220px] mx-auto"
@@ -623,6 +797,148 @@ function BriefCTASection() {
           </div>
         </div>
       </div>
+
+      {isModalOpen && (
+        <div
+          className="brief-modal-overlay"
+          onClick={() => setIsModalOpen(false)}
+        >
+          <div
+            className="brief-modal-panel"
+            style={{ animation: "textFadeUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards" }}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="brief-modal-header">
+              <h3 className={`text-2xl font-black tracking-tight text-white ${montserrat.className}`}>
+                Upload Brief
+              </h3>
+              <button
+                type="button"
+                className="w-9 h-9 rounded-full border border-white/20 text-white/80 hover:text-white hover:border-white/40 transition"
+                onClick={() => setIsModalOpen(false)}
+              >
+                x
+              </button>
+            </div>
+
+            <div className="brief-modal-body">
+              <div className="brief-modal-grid">
+                <input
+                  type="text"
+                  placeholder="Your name"
+                  value={briefFormData.name}
+                  onChange={(event) =>
+                    setBriefFormData((prev) => ({ ...prev, name: event.target.value }))
+                  }
+                  className="h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 outline-none focus:border-[#ff8015]"
+                />
+                <input
+                  type="email"
+                  placeholder="Work email *"
+                  value={briefFormData.email}
+                  onChange={(event) =>
+                    setBriefFormData((prev) => ({ ...prev, email: event.target.value }))
+                  }
+                  className="h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 outline-none focus:border-[#ff8015]"
+                />
+              </div>
+
+              <input
+                type="text"
+                placeholder="Company"
+                value={briefFormData.company}
+                onChange={(event) =>
+                  setBriefFormData((prev) => ({ ...prev, company: event.target.value }))
+                }
+                className="h-12 w-full px-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 outline-none focus:border-[#ff8015]"
+              />
+
+              <textarea
+                placeholder="Type your brief here (goals, audience, channels, guardrails)..."
+                value={briefFormData.brief}
+                onChange={(event) =>
+                  setBriefFormData((prev) => ({ ...prev, brief: event.target.value }))
+                }
+                className="w-full min-h-[120px] px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 outline-none focus:border-[#ff8015] resize-y"
+              />
+
+              <div
+                className={`brief-modal-dropzone ${isDragOver ? "is-active" : ""}`}
+                onDragOver={(event) => {
+                  event.preventDefault();
+                  setIsDragOver(true);
+                }}
+                onDragLeave={() => setIsDragOver(false)}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  setIsDragOver(false);
+                  appendFiles(event.dataTransfer.files);
+                }}
+              >
+                <p className="text-sm text-white/85 font-medium mb-2">Drop files here</p>
+                <p className="text-xs text-white/50 mb-4">Images, videos, PDFs, decks, docs</p>
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-white text-sm transition"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    Browse Files
+                  </button>
+                  <span className="text-xs text-white/50">{files.length} file(s) selected</span>
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  className="hidden"
+                  onChange={(event) => appendFiles(event.target.files)}
+                />
+              </div>
+
+              {files.length > 0 && (
+                <ul className="space-y-2 max-h-36 overflow-auto pr-1">
+                  {files.map((file, index) => (
+                    <li key={`${file.name}-${file.size}-${file.lastModified}`} className="flex items-center justify-between rounded-lg bg-white/5 border border-white/10 px-3 py-2">
+                      <span className="text-xs text-white/80 truncate pr-3">{file.name}</span>
+                      <button
+                        type="button"
+                        className="text-xs text-red-300 hover:text-red-200"
+                        onClick={() => removeFile(index)}
+                      >
+                        Remove
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {uploadMessage && uploadState !== "uploading" && (
+                <p className={`text-xs font-mono tracking-wide ${uploadState === "error" ? "text-red-400" : "text-white/60"}`}>
+                  {uploadMessage}
+                </p>
+              )}
+
+              <div className="brief-modal-actions">
+                <button
+                  type="button"
+                  className="brief-modal-btn border border-white/20 text-white/80 hover:text-white hover:border-white/40 transition"
+                  onClick={() => setIsModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="brief-modal-btn bg-gradient-to-r from-[#ff6b2b] to-[#ff8015] text-black font-bold hover:brightness-110 transition"
+                  onClick={handleSendBrief}
+                >
+                  Send Brief
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

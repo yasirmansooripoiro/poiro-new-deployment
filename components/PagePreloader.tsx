@@ -25,6 +25,7 @@ const SPRING_STIFFNESS = 100 * (1 / SPRING_DURATION);      // ≈ 111
 export default function PagePreloader() {
   const controls = useAnimation();
   const [isFinished, setIsFinished] = useState(false);
+  const isAnimatingRef = useRef(false);
 
   // CountUp-style spring — smooth interpolation between progress values
   const motionVal = useMotionValue(0);
@@ -37,6 +38,69 @@ export default function PagePreloader() {
   const counterRef = useRef<HTMLSpanElement>(null);
   const blurRef = useRef<SVGFEGaussianBlurElement>(null);
   const currentBlurRef = useRef(0);
+
+  useEffect(() => {
+    controls.set({ display: "flex", y: "0%" });
+  }, [controls]);
+
+  useEffect(() => {
+    const showEvent = "propheus:preloader-transition-show";
+    const hideEvent = "propheus:preloader-transition-hide";
+
+    const onShow = (event: Event) => {
+      if (!isFinished || isAnimatingRef.current) return;
+
+      const custom = event as CustomEvent<{ id?: string }>;
+      const requestId = custom.detail?.id;
+
+      isAnimatingRef.current = true;
+      controls.set({ display: "flex", y: "-100%" });
+      void controls
+        .start({
+          y: "0%",
+          transition: { duration: 0.52, ease: [0.25, 1, 0.5, 1] },
+        })
+        .then(() => {
+          isAnimatingRef.current = false;
+          window.dispatchEvent(
+            new CustomEvent("propheus:preloader-covered", {
+              detail: { id: requestId },
+            })
+          );
+        });
+    };
+
+    const onHide = (event: Event) => {
+      if (!isFinished || isAnimatingRef.current) return;
+
+      const custom = event as CustomEvent<{ id?: string }>;
+      const requestId = custom.detail?.id;
+
+      isAnimatingRef.current = true;
+      void controls
+        .start({
+          y: "-100%",
+          transition: { duration: 0.75, ease: [0.87, 0, 0.13, 1] },
+        })
+        .then(() => {
+          controls.set({ display: "none", y: "-100%" });
+          isAnimatingRef.current = false;
+          window.dispatchEvent(
+            new CustomEvent("propheus:preloader-hidden", {
+              detail: { id: requestId },
+            })
+          );
+        });
+    };
+
+    window.addEventListener(showEvent, onShow as EventListener);
+    window.addEventListener(hideEvent, onHide as EventListener);
+
+    return () => {
+      window.removeEventListener(showEvent, onShow as EventListener);
+      window.removeEventListener(hideEvent, onHide as EventListener);
+    };
+  }, [controls, isFinished]);
 
   // SIMULATE LOADING FOR DEMO PURPOSES
   // (In production, replace this with your actual asset/page loading listeners)
@@ -72,12 +136,16 @@ export default function PagePreloader() {
         
         // Wait for it to settle visually, then slide up and away
         setTimeout(() => {
+          isAnimatingRef.current = true;
           controls
             .start({
               y: "-100%",
               transition: { duration: 1.1, ease: [0.87, 0, 0.13, 1] }, // Buttery ease-out
             })
-            .then(() => controls.set({ display: "none" }));
+            .then(() => {
+              controls.set({ display: "none", y: "-100%" });
+              isAnimatingRef.current = false;
+            });
         }, 500);
       }
     });
