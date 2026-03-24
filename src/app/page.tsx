@@ -203,7 +203,9 @@ export default function Home() {
                 Where AI Meets Brand Storytelling
               </p>
               <a
-                href="#storytelling"
+                href="https://calendly.com/sameer-poiro/poiro-introduction-with-founders?month=2026-03"
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{
                   fontFamily: "var(--font-figtree)",
                   display: "inline-flex",
@@ -227,7 +229,7 @@ export default function Home() {
                   (e.currentTarget.style.filter = "brightness(1)")
                 }
               >
-                Begin your story ↗
+                Book a Demo ↗
               </a>
             </div>
           </div>

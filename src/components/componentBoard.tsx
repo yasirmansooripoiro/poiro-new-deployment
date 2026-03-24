@@ -194,7 +194,7 @@ export function Nav({ onCtaClick }: NavProps) {
         {[
           { label: "Storytelling OS", targetId: "operating-system" },
           { label: "Our Work", targetId: "masonry-gallery" },
-          { label: "Try Us", targetId: "second-video" },
+          { label: "Try Us", targetId: "what-happens" },
         ].map((item) => (
           <a
             key={item.label}
@@ -213,7 +213,29 @@ export function Nav({ onCtaClick }: NavProps) {
             }}
             onClick={(event) => {
               event.preventDefault();
-              scrollToSection(item.targetId);
+              
+              if (item.targetId === "what-happens") {
+                // Trigger the preloader down using your existing prop/event.
+                const showEvent = new CustomEvent("propheus:preloader-transition-show", { detail: { id: "scroll-to-os" } });
+                window.dispatchEvent(showEvent);
+
+                // Wait for the preloader to cover the screen entirely,
+                // scroll instantly to the correct section, and then 
+                // hide the preloader again.
+                setTimeout(() => {
+                  const target = document.getElementById("what-happens");
+                  if (target) {
+                    // Instantly scroll using scrollIntoView with center alignment
+                    target.scrollIntoView({ behavior: "instant", block: "center" });
+                  }
+                  
+                  // Signal the preloader to ride back up.
+                  const hideEvent = new CustomEvent("propheus:preloader-transition-hide", { detail: { id: "scroll-to-os" } });
+                  window.dispatchEvent(hideEvent);
+                }, 650);
+              } else {
+                scrollToSection(item.targetId);
+              }
             }}
             onMouseEnter={() => setHoveredLink(item.label)}
             onMouseLeave={() => setHoveredLink(null)}
@@ -257,7 +279,7 @@ export function Nav({ onCtaClick }: NavProps) {
             el.style.background = "linear-gradient(135deg, #FF6B2B 0%, #ff8015 50%, #e8541a 100%)";
           }}
         >
-          Upload Brief
+          Enter your Idea
         </button>
 
         <button

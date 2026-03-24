@@ -89,6 +89,7 @@ function FooterScene() {
 
 export default function FooterCTASection() {
   const sectionRef = useRef<HTMLElement>(null);
+  const ctaHeading = "Ship more. Spend less. Create without limits.";
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -137,7 +138,7 @@ export default function FooterCTASection() {
       id="footer-cta"
       style={{
         position: "relative",
-        minHeight: "100svh",
+        minHeight: "130svh",
         display: "flex",
         flexDirection: "column",
         justifyContent: "flex-end",
@@ -155,7 +156,7 @@ export default function FooterCTASection() {
           zIndex: 3,
           width: "100%",
           marginBottom: "auto",
-          paddingTop: "clamp(3px, 0.8vw, 10px)",
+          paddingTop: "clamp(80px, 15vh, 200px)",
           paddingLeft: "clamp(18px, 4vw, 52px)",
           paddingRight: "clamp(18px, 4vw, 52px)",
         }}
@@ -163,7 +164,7 @@ export default function FooterCTASection() {
         <div
           style={{
             width: "100%",
-            maxWidth: "980px",
+            maxWidth: "1400px",
             margin: "0 auto",
             paddingBottom: "clamp(54px, 9vw, 136px)",
             textAlign: "center",
@@ -175,12 +176,11 @@ export default function FooterCTASection() {
               fontFamily: "var(--font-figtree)",
               margin: 0,
               color: "#ffffff",
-              textWrap: "balance",
+              whiteSpace: "nowrap",
+              fontWeight: 700,
             }}
           >
-            Ship <span className="animate-gradient-text inline-block" style={{ paddingBottom: "12px" }}>more.</span> Spend <span className="animate-gradient-text inline-block" style={{ paddingBottom: "12px" }}>less.</span>
-            <br />
-            Create without <span className="animate-gradient-text inline-block" style={{ paddingBottom: "12px" }}>limits.</span>
+            {ctaHeading}
           </h3>
         </div>
       </div>

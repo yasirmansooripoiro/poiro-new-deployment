@@ -32,7 +32,7 @@ const LAYERS = [
   },
   {
     label: "Brand & Product",
-    detail: "Weave in your brand seamlessly",
+    detail: "Weaving in your brand seamlessly",
   },
 ];
 

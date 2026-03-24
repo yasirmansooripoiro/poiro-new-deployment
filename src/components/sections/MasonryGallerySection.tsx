@@ -273,7 +273,7 @@ export default function MasonryGallerySection() {
                 display: "inline-block"
               }}
             >
-              Gallery Output
+              Gallery
             </p>
           </div>
           <h2
@@ -281,12 +281,21 @@ export default function MasonryGallerySection() {
             style={{
               fontFamily: "var(--font-figtree)",
               marginTop: "clamp(30px, 4vw, 44px)",
-              marginBottom: "clamp(26px, 3vw, 38px)",
+              marginBottom: 0,
               paddingBottom: "clamp(4px, 0.7vw, 10px)",
             }}
           >
             Our <span className="work-animate-text-flow">Work</span>
           </h2>
+          <div
+            style={{
+              marginTop: "clamp(24px, 3.2vw, 38px)",
+              marginBottom: "clamp(30px, 4vw, 50px)",
+              height: 1,
+              width: "100%",
+              background: "linear-gradient(to right, rgba(0,0,0,0), rgba(68,68,68,1), rgba(0,0,0,0))",
+            }}
+          />
         </div>
 
         <div

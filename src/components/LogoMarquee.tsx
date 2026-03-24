@@ -90,6 +90,7 @@ export default function LogoMarquee() {
           style={{
             margin: 0,
             textAlign: "center",
+            fontFamily: "var(--font-figtree), sans-serif",
             fontSize: "clamp(14px, 1.5vw, 24px)",
             lineHeight: 1.2,
             letterSpacing: "0.01em",
@@ -97,7 +98,7 @@ export default function LogoMarquee() {
             color: "#fff",
           }}
         >
-          Brands We&apos;ve Worked With
+          Brands we&apos;ve worked with
         </h2>
 
         <div
