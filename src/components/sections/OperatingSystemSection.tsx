@@ -17,35 +17,35 @@ const MODULES: ModuleConfig[] = [
     id: "context",
     title: "Curate Context",
     system: "Brand Cosmos",
-    description: "Tap into a living universe of trends and audience signals to create content your consumers can't scroll past.",
+    description: "Tap into a living universe of trends and audience signals to create content your consumers can't scroll past. Tracking the best brands and creators in your category, Brand Cosmos parses thousands of hours of content to surface the most compelling ideas, storylines, visual concepts and hooks, so inspiration is never more than a search away. Stay ahead of the curve, always.",
     image: "/os/brand-cosmos.mp4",
   },
   {
     id: "atlas",
     title: "Ideate & Communicate",
     system: "Atlas",
-    description: "Where great ideas become brilliant briefs, and creative teams finally work as one.",
+    description: "Where great ideas become brilliant briefs, and creative teams finally work as one. Ideate with an intelligent briefing agent, curate references from across the web, generate samples and manage feedback, all in one place, so your creative team nails it on the very first iteration. From first spark to final delivery, all in one place.",
     image: "/os/atlas.webp",
   },
   {
     id: "flow",
     title: "Create Limitlessly",
     system: "Infinite Flow",
-    description: "Generate visual stories and creative variations at scale through AI workflows.",
+    description: "From six-second hooks to full-scale TVCs, unleash visual stories at a scale you never thought possible. Collaboratively build creative workflows, choose from 100+ AI models and proprietary pipelines, and take precise control over every step across every channel, every format, every brief. Your imagination is the only limit.",
     image: "/os/infinite-flow.webp",
   },
   {
     id: "apps",
     title: "Build Apps",
-    system: "AppStudio",
-    description: "Turn creative workflows into custom applications powering marketing operations.",
+    system: "App Studio",
+    description: "Turn your creative workflows into powerful no-code apps, so your best ideas scale without limits. Convert even your most complex creative workflows into simple, intuitive apps and put the power of world-class content creation in the hands of everyone in your organisation. Build once, create forever.",
     image: "/os/appstudio.webp",
   },
   {
     id: "studio",
     title: "Final Touch",
     system: "Poiro Studio",
-    description: "Refine, distribute, and optimize content across channels.",
+    description: "Polish every pixel, perfect every frame. AI-powered editing, entirely on your terms. Edit images and videos with a level of precision and finesse that was once the preserve of the most skilled editors because no one understands your creative vision better than you. Because the details are everything.",
     image: "/os/poiro-studio.webp",
   },
 ];
@@ -331,7 +331,7 @@ export default function OperatingSystemSection() {
             </div>
           </div>
         </div>
-        <div style={{ maxWidth: 1200, margin: "0 auto", width: "100%", position: "relative", zIndex: 1 }}>
+        <div id="what-happens" style={{ maxWidth: 1200, margin: "0 auto", width: "100%", position: "relative", zIndex: 1 }}>
           <div style={{ marginTop: "clamp(160px, 12vw, 240px)", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
             <h2
               style={{
@@ -347,6 +347,14 @@ export default function OperatingSystemSection() {
               Here's What Happens <br />to your{" "}
               <span className="os-animate-text-flow">Brief.</span>
             </h2>
+            <div
+              style={{
+                marginTop: "clamp(40px, 5vw, 60px)",
+                height: 1,
+                width: "100%",
+                background: "linear-gradient(to right, rgba(0,0,0,0), rgba(68,68,68,1), rgba(0,0,0,0))",
+              }}
+            />
           </div>
         </div>
       </div>

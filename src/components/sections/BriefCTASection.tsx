@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Figtree } from "next/font/google";
+import ColorBends from "@/components/ColorBends";
 
 const figtree = Figtree({
   subsets: ["latin"],
@@ -313,7 +314,21 @@ function BriefCTASection() {
         justifyContent: "center",
       }}
     >
-      <div className="absolute inset-0 z-0 bg-transparent opacity-20 mix-blend-screen" />
+      <div className="absolute inset-0 z-0 pointer-events-none mix-blend-screen opacity-[45%]">
+        <ColorBends
+          colors={["#ff8015", "#fe7216", "#ff5c7a"]}
+          rotation={1}
+          speed={0.17}
+          scale={1.1}
+          frequency={1}
+          warpStrength={1}
+          mouseInfluence={0.5}
+          parallax={0.5}
+          noise={0.1}
+          transparent={true}
+          autoRotate={0}
+        />
+      </div>
 
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-[#ff8015] rounded-[100%] blur-[150px] opacity-[0.08] pointer-events-none z-0" />
 
@@ -397,42 +412,58 @@ function BriefCTASection() {
             align-items: center;
             justify-content: center;
             padding: clamp(12px, 2vw, 24px);
-            background: rgba(0, 0, 0, 0.62);
-            backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.72);
+            backdrop-filter: blur(12px);
           }
 
           .brief-modal-panel {
-            width: min(100%, 760px);
-            max-height: min(88vh, 760px);
-            border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            background: linear-gradient(145deg, rgba(14,14,14,0.9), rgba(7,7,7,0.86));
-            box-shadow: 0 30px 120px rgba(0, 0, 0, 0.65);
+            width: min(100%, 820px);
+            max-height: min(92vh, 840px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: linear-gradient(160deg, #111111, #080808);
+            box-shadow: 0 40px 140px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.05);
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
           }
 
           .brief-modal-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
-            padding: 18px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            gap: 16px;
+            padding: 24px 32px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
           }
 
           .brief-modal-body {
-            padding: 16px 20px 18px;
+            padding: 32px;
             display: flex;
             flex-direction: column;
-            gap: 14px;
-            max-height: calc(min(88vh, 760px) - 74px);
+            gap: 24px;
             overflow-y: auto;
+            flex: 1;
+            /* Scrollbar styling */
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.2) transparent;
+          }
+          
+          .brief-modal-body::-webkit-scrollbar {
+            width: 6px;
+          }
+          .brief-modal-body::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          .brief-modal-body::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
           }
 
           .brief-modal-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 12px;
+            gap: 20px;
           }
 
           @media (min-width: 768px) {
@@ -441,35 +472,96 @@ function BriefCTASection() {
             }
           }
 
+          /* General Input Styles */
+          .brief-modal-input {
+            height: 52px;
+            padding: 0 18px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.2s ease;
+          }
+          .brief-modal-input::placeholder {
+            color: rgba(255, 255, 255, 0.35);
+          }
+          .brief-modal-input:focus {
+            border-color: #ff8015;
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 0 4px rgba(255, 128, 21, 0.1);
+          }
+
+          .brief-modal-textarea {
+            width: 100%;
+            min-height: 160px;
+            padding: 16px 18px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+            font-size: 15px;
+            line-height: 1.5;
+            outline: none;
+            transition: all 0.2s ease;
+            resize: vertical;
+          }
+          .brief-modal-textarea::placeholder {
+            color: rgba(255, 255, 255, 0.35);
+          }
+          .brief-modal-textarea:focus {
+            border-color: #ff8015;
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 0 4px rgba(255, 128, 21, 0.1);
+          }
+
           .brief-modal-dropzone {
             border-radius: 16px;
-            border: 2px dashed rgba(255, 255, 255, 0.18);
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.02);
+            padding: 32px 24px;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+          }
+          
+          .brief-modal-dropzone:hover {
+            border-color: rgba(255, 255, 255, 0.3);
             background: rgba(255, 255, 255, 0.04);
-            padding: 16px;
-            transition: 240ms ease;
           }
 
           .brief-modal-dropzone.is-active {
-            border-color: rgba(255, 128, 21, 0.9);
-            background: rgba(255, 128, 21, 0.1);
+            border-color: #ff8015;
+            background: rgba(255, 128, 21, 0.08);
           }
 
           .brief-modal-actions {
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            gap: 10px;
-            padding-top: 8px;
+            gap: 16px;
+            padding-top: 24px;
+            margin-top: 8px;
             border-top: 1px solid rgba(255, 255, 255, 0.08);
           }
 
           .brief-modal-btn {
-            height: 40px;
-            padding: 0 16px;
-            border-radius: 10px;
-            font-size: 14px;
+            height: 48px;
+            padding: 0 24px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
             line-height: 1;
             white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
           }
         `}
       </style>
@@ -482,8 +574,8 @@ function BriefCTASection() {
           className="w-full text-center"
           style={{ maxWidth: 1120, margin: "0 auto", marginBottom: "clamp(28px, 4vw, 56px)" }}
         >
-          <h2 className={`text-4xl md:text-6xl lg:text-7xl font-black text-white tracking-tighter ${figtree.className}`}>
-            Don't <span className="brief-animate-text-flow">believe</span> us?
+          <h2 className={`text-4xl md:text-6xl lg:text-7xl font-bold text-white tracking-tighter ${figtree.className}`}>
+            <span className="brief-animate-text-flow">Unbelievable</span> right?
           </h2>
           <h4
             style={{
@@ -809,20 +901,21 @@ function BriefCTASection() {
           onClick={() => setIsModalOpen(false)}
         >
           <div
-            className="brief-modal-panel"
+            className={`brief-modal-panel ${figtree.className}`}
             style={{ animation: "textFadeUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards" }}
             onClick={(event) => event.stopPropagation()}
           >
             <div className="brief-modal-header">
-              <h3 className={`text-2xl font-black tracking-tight text-white ${figtree.className}`}>
-                Upload Brief
+              <h3 className="text-[28px] font-black tracking-tighter text-white m-0">
+                Enter your Idea
               </h3>
               <button
                 type="button"
-                className="w-9 h-9 rounded-full border border-white/20 text-white/80 hover:text-white hover:border-white/40 transition"
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all font-bold"
                 onClick={() => setIsModalOpen(false)}
+                style={{ fontSize: "16px" }}
               >
-                x
+                ✕
               </button>
             </div>
 
@@ -835,7 +928,7 @@ function BriefCTASection() {
                   onChange={(event) =>
                     setBriefFormData((prev) => ({ ...prev, name: event.target.value }))
                   }
-                  className="h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 outline-none focus:border-[#ff8015]"
+                  className="brief-modal-input"
                 />
                 <input
                   type="email"
@@ -844,7 +937,7 @@ function BriefCTASection() {
                   onChange={(event) =>
                     setBriefFormData((prev) => ({ ...prev, email: event.target.value }))
                   }
-                  className="h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 outline-none focus:border-[#ff8015]"
+                  className="brief-modal-input"
                 />
               </div>
 
@@ -855,7 +948,7 @@ function BriefCTASection() {
                 onChange={(event) =>
                   setBriefFormData((prev) => ({ ...prev, company: event.target.value }))
                 }
-                className="h-12 w-full px-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 outline-none focus:border-[#ff8015]"
+                className="brief-modal-input w-full"
               />
 
               <textarea
@@ -864,11 +957,12 @@ function BriefCTASection() {
                 onChange={(event) =>
                   setBriefFormData((prev) => ({ ...prev, brief: event.target.value }))
                 }
-                className="w-full min-h-[120px] px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 outline-none focus:border-[#ff8015] resize-y"
+                className="brief-modal-textarea"
               />
 
               <div
                 className={`brief-modal-dropzone ${isDragOver ? "is-active" : ""}`}
+                onClick={() => fileInputRef.current?.click()}
                 onDragOver={(event) => {
                   event.preventDefault();
                   setIsDragOver(true);
@@ -880,17 +974,32 @@ function BriefCTASection() {
                   appendFiles(event.dataTransfer.files);
                 }}
               >
-                <p className="text-sm text-white/85 font-medium mb-2">Drop files here</p>
-                <p className="text-xs text-white/50 mb-4">Images, videos, PDFs, decks, docs</p>
-                <div className="flex flex-wrap items-center gap-3">
-                  <button
-                    type="button"
-                    className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-white text-sm transition"
-                    onClick={() => fileInputRef.current?.click()}
+                <div 
+                  className="w-12 h-12 rounded-full bg-white/5 mb-4 flex items-center justify-center border border-white/10 text-white/60"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                </div>
+                <p className="text-[16px] text-white font-semibold mb-2">Drop files here</p>
+                <p className="text-[14px] text-white/40 mb-6">Images, videos, PDFs, decks, docs</p>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <span
+                    className="flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 border border-white/5 text-white text-[14px] font-medium transition-colors pointer-events-none"
+                    style={{ padding: "8px 24px", minWidth: "120px" }}
                   >
                     Browse Files
-                  </button>
-                  <span className="text-xs text-white/50">{files.length} file(s) selected</span>
+                  </span>
+                  {files.length > 0 && (
+                    <span 
+                      className="flex items-center justify-center text-[13px] text-[#ff8015] font-medium bg-[#ff8015]/10 rounded-full"
+                      style={{ padding: "8px 16px" }}
+                    >
+                      {files.length} file(s) selected
+                    </span>
+                  )}
                 </div>
                 <input
                   ref={fileInputRef}
@@ -902,14 +1011,17 @@ function BriefCTASection() {
               </div>
 
               {files.length > 0 && (
-                <ul className="space-y-2 max-h-36 overflow-auto pr-1">
+                <ul className="flex flex-col gap-2 max-h-[160px] overflow-auto pr-2" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(255,255,255,0.2) transparent" }}>
                   {files.map((file, index) => (
-                    <li key={`${file.name}-${file.size}-${file.lastModified}`} className="flex items-center justify-between rounded-lg bg-white/5 border border-white/10 px-3 py-2">
-                      <span className="text-xs text-white/80 truncate pr-3">{file.name}</span>
+                    <li key={`${file.name}-${file.size}-${file.lastModified}`} className="flex items-center justify-between rounded-xl bg-white/[0.03] border border-white/10 px-4 py-3">
+                      <span className="text-[14px] text-white/80 truncate pr-4 font-medium">{file.name}</span>
                       <button
                         type="button"
-                        className="text-xs text-red-300 hover:text-red-200"
-                        onClick={() => removeFile(index)}
+                        className="text-[13px] text-white/40 hover:text-red-400 font-semibold transition-colors flex-shrink-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeFile(index);
+                        }}
                       >
                         Remove
                       </button>
@@ -919,7 +1031,7 @@ function BriefCTASection() {
               )}
 
               {uploadMessage && uploadState !== "uploading" && (
-                <p className={`text-xs font-mono tracking-wide ${uploadState === "error" ? "text-red-400" : "text-white/60"}`}>
+                <p className={`text-[14px] font-medium tracking-wide ${uploadState === "error" ? "text-red-400" : "text-white/60"}`}>
                   {uploadMessage}
                 </p>
               )}
@@ -927,15 +1039,14 @@ function BriefCTASection() {
               <div className="brief-modal-actions">
                 <button
                   type="button"
-                  className="brief-modal-btn border border-white/20 text-white/80 hover:text-white hover:border-white/40 transition"
+                  className="brief-modal-btn bg-transparent border border-white/10 text-white/70 hover:text-white hover:bg-white/5 hover:border-white/20 transition-all"
                   onClick={() => setIsModalOpen(false)}
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
-                  style={{ fontFamily: "var(--font-figtree)" }}
-                  className="brief-modal-btn bg-gradient-to-r from-[#ff6b2b] to-[#ff8015] text-black font-bold hover:brightness-110 transition"
+                  className="brief-modal-btn bg-[#ff8015] hover:bg-[#ff953f] text-black transition-all shadow-[0_0_20px_rgba(255,128,21,0.3)]"
                   onClick={handleSendBrief}
                 >
                   Send Brief

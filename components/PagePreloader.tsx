@@ -102,21 +102,71 @@ export default function PagePreloader() {
     };
   }, [controls, isFinished]);
 
-  // SIMULATE LOADING FOR DEMO PURPOSES
-  // (In production, replace this with your actual asset/page loading listeners)
+  // REAL LOADING LOGIC (Masonry Gallery Images)
   useEffect(() => {
     let current = 0;
+    let isPreloadDone = false;
+
+    // 1. Start the actual image preloading process
+    const preloadMasonryImages = async () => {
+      try {
+        const folders = ["short-form", "statics", "ugc-affiliate", "tvc-animatics"];
+        const fetchPromises = folders.map((folder) =>
+          fetch(`/api/masonry?folder=${folder}`).then((res) => res.json())
+        );
+        
+        const results = await Promise.all(fetchPromises);
+        const mediaUrls: string[] = [];
+
+        results.forEach((res) => {
+          if (res.media && Array.isArray(res.media)) {
+            res.media.forEach((item: any) => {
+              if (item.type === "image") {
+                mediaUrls.push(item.src);
+              }
+            });
+          }
+        });
+
+        // Block until all images are fully buffered by the browser
+        await Promise.all(
+          mediaUrls.map(
+            (url) =>
+              new Promise((resolve) => {
+                const img = new Image();
+                img.onload = resolve;
+                img.onerror = resolve; // Ignore specific image failures to keep moving
+                img.src = url;
+              })
+          )
+        );
+      } catch (e) {
+        console.error("Preloader: Failed to fetch masonry manifests", e);
+      } finally {
+        isPreloadDone = true;
+      }
+    };
+
+    preloadMasonryImages();
+
+    // 2. Drive the preloader number up realistically but don't quite finish until data is pulled
     const interval = setInterval(() => {
-      // Jump by random chunks to simulate real network loading
-      current += Math.random() * 15 + 5; 
-      
-      if (current >= 100) {
-        current = 100;
-        clearInterval(interval);
+      if (!isPreloadDone) {
+        // Grow to 85% max if we are still waiting on images
+        const diff = 85 - current;
+        current += Math.random() * (diff * 0.25) + 2; 
+        if (current > 85) current = 85; 
+      } else {
+        // Once done, speed all the way to 100%
+        current += Math.random() * 15 + 10;
+        if (current >= 100) {
+          current = 100;
+          clearInterval(interval);
+        }
       }
       
       motionVal.set(current);
-    }, 300);
+    }, 200);
 
     return () => clearInterval(interval);
   }, [motionVal]);
